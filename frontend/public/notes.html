@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <div class="navbar">
+        <a href="../index.html">Home</a>
+        <a href="signup.html">Signup</a>
+        <a href="login.html">Login</a>
+        <a class = "active " href="notes.html">Notes</a>
+        <a href="./logout.html">Logout</a>
+    </div>
+
+    <div id="notes">
+        <h1 id="note-username"></h1>
+         Notes are available at console
+    </div>
+
+   <div id="crud-note">
+    <button onclick="handleGetNotes()">Get Notes</button>
+    <button onclick="hanldeCreateNote()">Create new note</button>
+   </div>
+
+   <div id="note-data"></div>
+
+  <div id="create-note-modal" style="display: none;">
+    <input type="text" id="note-title" placeholder="Title"><br>
+    <textarea id="note-body" placeholder="Body"></textarea><br>
+    <button onclick="saveNote()">Save</button>
+  </div>
+
+</body>
+</html>
+
+<script>
+    const h1 = document.getElementById("note-username");
+    const username = JSON.parse(localStorage.getItem("username"));
+
+    if(username){
+      h1.innerHTML = `Hello,${username}` ;
+    }else{
+        h1.innerHTML = "Please login..";
+    }
+    
+
+    const BaseURL = `https://lime-gharial-tie.cyclic.app`;
+    const token  = JSON.parse(localStorage.getItem("accessToken"));
+     function hanldeCreateNote(){
+        document.getElementById("create-note-modal").style.display = "block";
+     }
+
+     async function saveNote(){
+        try{
+              const title = document.getElementById("note-title").value;
+              const body = document.getElementById("note-body").value;
+              const payload = {
+                title,
+                body
+              }
+              console.log("payload is :",payload);
+              if(token){
+                    const res = await fetch(`${BaseURL}/note/create`,{
+                    method:"POST",
+                    headers:{
+                        "Content-type":"application/json",
+                        Authorization: `Bearer ${token}`
+                    },
+                    body:JSON.stringify(payload)
+                });
+                const data = await res.json();
+                console.log(data);
+                document.getElementById("create-note-modal").style.display = "none";
+            }else{
+                console.log("Token is missing please login...");
+            }
+            
+        }catch(error){
+            console.log(error.message);
+        }
+     };
+
+     async function handleGetNotes(){
+        const token  = JSON.parse(localStorage.getItem("accessToken"));
+        try{
+            if(token){
+                const res = await fetch(`${BaseURL}/note`,{
+                method:"GET",
+                headers:{
+                    Authorization:`Bearer ${token}`
+                }
+            })
+            const data = await res.json();
+            console.log(data.notes);
+            appendNotes(data.notes);
+        }else{
+            console.log("Token is missing...Please login...");
+        }    
+        }catch(error){
+            console.log(error.message)
+        }
+     };
+
+     function appendNotes(notes){
+        const mainSection = document.getElementById("note-data");
+        mainSection.innerHTML = " " ;
+        
+       notes.forEach((note)=>{
+            let card = createCard(note);
+            mainSection.append(card);
+       })
+     };
+
+     function createCard(note){
+        let card = document.createElement("div");
+        card.classList.add("card-list");
+
+        let author = document.createElement("h3");
+        author.innerHTML = `Auhtor is : ${note.author}` ;
+
+        let title = document.createElement("h4");
+        title.innerHTML = `Title is : ${note.title}` ;
+
+        let body = document.createElement("p");
+        body.innerHTML = `Content of note : ${note.body}` ;
+
+        let updateNote = document.createElement("button");
+        updateNote.innerHTML = "Update note" ;
+
+        updateNote.addEventListener('click',()=>{
+            let modal = createUpdateModal(note);
+            card.appendChild(modal);
+        });
+        
+        let deleteNote = document.createElement("button");
+        deleteNote.innerHTML = "Delete note" ;
+        deleteNote.addEventListener("click",async()=>{
+            try{
+                const id = note._id ;
+                 const res = await fetch(`${BaseURL}/note/${id}`,{
+                    method:"DELETE",
+                    headers:{
+                        Authorization:`Bearer ${token}`
+                    }
+                 });
+                 const data = await res.json();
+                 console.log(data);
+            }catch(error){
+                console.log(error.message);
+            }
+        })
+
+        card.append(author,title,body,updateNote,deleteNote);
+        return card ;
+     };
+
+     function createUpdateModal(note) {
+        
+        let modal = document.createElement("div");
+        modal.classList.add("update-modal");
+
+        let titleLabel = document.createElement("label");
+        titleLabel.innerHTML = "Title:";
+        let titleInput = document.createElement("input");
+        titleInput.setAttribute("type", "text");
+        titleInput.value = note.title;
+
+        let bodyLabel = document.createElement("label");
+        bodyLabel.innerHTML = "Body:";
+        let bodyInput = document.createElement("textarea");
+        bodyInput.value = note.body;
+
+        let saveButton = document.createElement("button");
+        saveButton.innerHTML = "Save";
+        saveButton.addEventListener("click",async()=>{
+            const payload = {
+                title: titleInput.value,
+                body:bodyInput.value 
+            }
+            console.log("payload for updating note is:",payload);
+            try{
+                 const id = note._id ;
+                const res = await fetch(`${BaseURL}/note/${id}`,{
+                    method:"PATCH",
+                    headers:{
+                        "Content-type":"application/json",
+                        Authorization:`Bearer ${token}`
+                    },
+                    body:JSON.stringify(payload)
+                });
+               const data = await res.json();
+               console.log(data);
+               modal.remove();
+            }catch(error){
+                console.log(error.message);
+            }
+        });
+        modal.append(titleLabel, titleInput, bodyLabel, bodyInput, saveButton);
+        return modal;
+}   
+</script>    

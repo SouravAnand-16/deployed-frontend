@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style/style.css"> 
+    <title>Logout</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="../index.html">Home</a>
+    <a href="signup.html">Signup</a>
+    <a href="login.html">Login</a>
+    <a href="notes.html">Notes</a>
+    <a class = "active "href="./logout.html">Logout</a>
+</div>
+
+<div>
+    <h3 id="message">Click on logout button to proceed</h3>
+    <button onclick="handleLogout()" id="logout-btn">logout</button>
+</div>
+
+</body>
+</html>
+<script>
+    const message = document.getElementById("message");
+    function handleLogout(){
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("username");
+        message.innerHTML = "You have been logged out.."
+    }
+</script>

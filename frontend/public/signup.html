@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style/style.css"> 
+    <title>Signup</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="../index.html">Home</a>
+    <a class="active" href="signup.html">Signup</a>
+    <a href="login.html">Login</a>
+    <a href="notes.html">Notes</a>
+    <a href="./logout.html">Logout</a>
+</div>
+
+<div id="success-message"></div>
+
+<div class="container">
+    <h1>Signup</h1>
+    <div class="input-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" required>
+    </div>
+    <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="input-group">
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password" required>
+    </div>
+    <button onclick="userRegisteration()">Signup</button>
+</div>
+
+</body>
+</html>
+
+<script>
+    const BaseURL = `https://lime-gharial-tie.cyclic.app`;
+    async function userRegisteration(){
+        try{
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+            const payload = {
+                username,
+                email,
+                password
+            }
+            console.log("payload is :",payload);
+            const res = await fetch(`${BaseURL}/user/register`,{
+                method:"POST",
+                headers:{
+                    "Content-Type":"application/json"
+                },
+                body:JSON.stringify(payload)
+            });
+            const data = await res.json();
+            appendMessage(data);
+            console.log(data.msg);
+        }catch(error){
+            console.log(error.message);
+        }
+    };
+
+    function appendMessage(data){
+        const message = data.msg ;
+        const div = document.getElementById("success-message");
+
+        const h1 = document.createElement("h1");
+        h1.classList.add("message");
+        h1.innerHTML = message ;
+
+        div.append(h1);
+    }
+</script>

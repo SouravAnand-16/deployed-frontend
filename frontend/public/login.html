@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../style/style.css"> 
+    <title>Login</title>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="../index.html">Home</a>
+    <a href="signup.html">Signup</a>
+    <a class="active" href="login.html">Login</a>
+    <a href="notes.html">Notes</a>
+    <a href="./logout.html">Logout</a>
+</div>
+
+<div class="container">
+    <h1>Login</h1>
+    <div class="input-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
+    </div>
+    <div class="input-group">
+        <label for="password">Password</label>
+        <input type="text" id="password" name="password" required>
+    </div>
+    <button onclick="handleLogin()">Login</button>
+</div>
+
+</body>
+</html>
+
+<script>
+    const BaseURL = `https://lime-gharial-tie.cyclic.app`;
+
+    async function handleLogin(){
+        try{
+            const email = document.getElementById("email").value ;
+            const password = document.getElementById("password").value ;
+            const payload = {
+                email,
+                password
+            };
+            const res = await fetch(`${BaseURL}/user/login`,{
+                method:"POST",
+                headers:{
+                    "Content-type":"application/json"
+                },
+                body:JSON.stringify(payload)
+            });
+            const data = await res.json();
+            await setToken(data); 
+             window.location.href="notes.html";
+        }catch(error){
+           console.log(error.message);
+        }
+    };
+
+    async function setToken(data){
+        try{
+            if(data.accessToken){
+                localStorage.setItem("accessToken",JSON.stringify(data.accessToken));
+                localStorage.setItem("username",JSON.stringify(data.username));
+                console.log("set the token in LS");
+            }else{
+                console.log("please type right password..");
+            }   
+        }catch(error){
+            console.log(error.message);
+        }
+    }
+</script>
